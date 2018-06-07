@@ -1,0 +1,18 @@
+version: "3"
+services:
+  apollo:
+    build: ./apollo
+    volumes:
+      - ./apollo:/app
+    ports:
+     - "4000:4000"
+    command: nodemon server.js
+  client:
+    build: ./client
+    volumes:
+      - ./client:/app
+    ports:
+     - "8080:8080"
+    command: yarn start
+  redis:
+    image: "redis:alpine"
