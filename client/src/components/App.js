@@ -1,10 +1,10 @@
-import React from 'react'
+import React from "react";
+import { render } from "react-dom";
 
-const App = (props) => {
+import CharacterList from 'Containers/CharacterList'
 
-  return (
-    <h1>Test 3</h1>
-  )
-}
+const App = () => (
+  <CharacterList />
+);
 
 export default App

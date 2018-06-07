@@ -3,14 +3,14 @@ const { ApolloServer, gql } = require('apollo-server');
 // This is a (sample) collection of books we'll be able to query
 // the GraphQL server for.  A more complete example might fetch
 // from an existing data source like a REST API or database.
-const books = [
+const characters = [
   {
-    title: 'Harry Potter and the Chamber of Secrets',
-    author: 'J.K. Rowling',
+    name: 'Spider-Man',
+    img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/526548a343e4b.jpg',
   },
   {
-    title: 'Jurassic Park 2',
-    author: 'Michael Crichton',
+    name: 'Captain America',
+    img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/537ba56d31087.jpg',
   },
 ];
 
@@ -20,15 +20,15 @@ const typeDefs = gql`
   # Comments in GraphQL are defined with the hash (#) symbol.
 
   # This "Book" type can be used in other type declarations.
-  type Book {
-    title: String
-    author: String
+  type Character {
+    name: String
+    img: String
   }
 
   # The "Query" type is the root of all GraphQL queries.
   # (A "Mutation" type will be covered later on.)
   type Query {
-    books: [Book]
+    characters: [Character]
   }
 `;
 
@@ -36,7 +36,7 @@ const typeDefs = gql`
 // schema.  We'll retrieve books from the "books" array above.
 const resolvers = {
   Query: {
-    books: () => books,
+    characters: () => characters,
   },
 };
 
