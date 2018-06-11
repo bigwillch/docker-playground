@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server');
+const { ApolloServer, gql } = require('apollo-server')
 
 // This is a (sample) collection of books we'll be able to query
 // the GraphQL server for.  A more complete example might fetch
@@ -30,6 +30,13 @@ const typeDefs = gql`
   type Query {
     characters: [Character]
   }
+
+  # The mutation root type, used to define all mutations.
+  type Mutation {
+    # A mutation to add a new channel to the list of channels
+    addCharacter(name: String!): Character
+  }
+
 `;
 
 // Resolvers define the technique for fetching the types in the
@@ -38,6 +45,13 @@ const resolvers = {
   Query: {
     characters: () => characters,
   },
+  Mutation: {
+    addCharacter: (root, args) => {
+      const newCharacter = { name: args.name };
+      characters.push(newCharacter);
+      return newCharacter;
+    },
+  }
 };
 
 // In the most basic sense, the ApolloServer can be started

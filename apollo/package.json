@@ -5,7 +5,8 @@
   "license": "MIT",
   "devDependencies": {
     "apollo-server": "^2.0.0-beta.4",
-    "graphql": "^0.13.2"
+    "graphql": "^0.13.2",
+    "graphql-tag": "^2.9.2"
   },
   "scripts": {
     "start": "node server.js"
