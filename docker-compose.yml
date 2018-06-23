@@ -2,12 +2,15 @@ version: "3"
 services:
   apollo:
     build: ./apollo
+    environment:
+      MARVEL_PUBLIC: ${MARVEL_PUBLIC}
+      MARVEL_PRIVATE: ${MARVEL_PRIVATE}
     volumes:
       - ./apollo:/app
-      - /app/node_modules
+      - ./apollo/node_modules:/app/node_modules
     ports:
      - "4000:4000"
-    command: nodemon server.js
+    command: nodemon server.js --exec babel-node
   client:
     build: ./client
     volumes:

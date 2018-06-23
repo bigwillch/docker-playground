@@ -1,66 +1,102 @@
+import 'babel-polyfill';
 const { ApolloServer, gql } = require('apollo-server')
+const { RESTDataSource } = require('apollo-datasource-rest')
+const qs = require('qs')
+// const { RedisCache } = require('apollo-server-redis');
 
-// This is a (sample) collection of books we'll be able to query
-// the GraphQL server for.  A more complete example might fetch
-// from an existing data source like a REST API or database.
-const characters = [
-  {
-    name: 'Spider-Man',
-    img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/526548a343e4b.jpg',
-  },
-  {
-    name: 'Captain America',
-    img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/537ba56d31087.jpg',
-  },
-];
+const md5 = require('md5')
 
-// Type definitions define the "shape" of your data and specify
-// which ways the data can be fetched from the GraphQL server.
+const auth = {
+  marvel: {
+    public: process.env.MARVEL_PUBLIC,
+    private: process.env.MARVEL_PRIVATE
+  }
+}
+
+const ts = Date.now();
+const authParams = {
+  apikey: auth.marvel.public,
+  ts: ts,
+  hash: md5(ts + auth.marvel.private + auth.marvel.public)
+}
+
+class MarvelAPI extends RESTDataSource {
+  baseURL = 'http://gateway.marvel.com/v1/public/';
+
+  async getCharacters(name) {
+    const args = { 
+      limit: 20,
+      orderBy: 'name',
+      nameStartsWith: 'Cap' 
+    }
+    const params = qs.stringify({
+      ...authParams,
+      ...args
+    })
+    console.log(params)
+
+    const result = await this.get(`characters?${params}`);
+
+    console.log(result)
+
+    return result.response && result.response.docs ? result.response.docs : []  
+
+  }
+
+  // async getProgressFor(movieId: string) {
+  //   return this.get('progress', {
+  //     id: movieId,
+  //   });
+  // }
+}
+
+// const characters = [
+//   {
+//     name: 'Spider-Man',
+//     img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/526548a343e4b.jpg',
+//   },
+//   {
+//     name: 'Captain America',
+//     img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/537ba56d31087.jpg',
+//   },
+// ];
+
 const typeDefs = gql`
-  # Comments in GraphQL are defined with the hash (#) symbol.
-
-  # This "Book" type can be used in other type declarations.
   type Character {
     name: String
     img: String
   }
 
-  # The "Query" type is the root of all GraphQL queries.
-  # (A "Mutation" type will be covered later on.)
   type Query {
     characters: [Character]
   }
 
-  # The mutation root type, used to define all mutations.
-  type Mutation {
-    # A mutation to add a new channel to the list of channels
-    addCharacter(name: String!): Character
-  }
-
 `;
 
-// Resolvers define the technique for fetching the types in the
-// schema.  We'll retrieve books from the "books" array above.
 const resolvers = {
   Query: {
-    characters: () => characters,
-  },
-  Mutation: {
-    addCharacter: (root, args) => {
-      const newCharacter = { name: args.name };
-      characters.push(newCharacter);
-      return newCharacter;
+    // characters: () => characters,
+    characters: async (_source, { name }, { dataSources }) => {
+      console.log('Query run')
+      return dataSources.marvelAPI.getCharacters(name)
     },
+  },
+  Character: {
+    name: () => 'test',
+    img: () => 'testimg'
   }
 };
 
-// In the most basic sense, the ApolloServer can be started
-// by passing type definitions (typeDefs) and the resolvers
-// responsible for fetching the data for those types.
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  dataSources: () => {
+    return {
+      marvelAPI: new MarvelAPI()
+    };
+  },
+});
 
-// This `listen` method launches a web-server.  Existing apps
-// can utilize middleware options, which we'll discuss later.
 server.listen().then(({ url }) => {
   console.log(`🚀  Server ready at ${url}`);
 });
