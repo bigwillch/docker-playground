@@ -5,6 +5,10 @@
     "stage-3"
   ],
   "plugins": [
-    "transform-class-properties"
+    "transform-class-properties",
+    ["transform-runtime", {
+      "polyfill": false,
+      "regenerator": true
+    }]
   ]
 }
