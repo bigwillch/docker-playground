@@ -33,31 +33,13 @@ class MarvelAPI extends RESTDataSource {
       ...authParams,
       ...args
     })
-    console.log(params)
 
     const result = await this.get(`characters?${params}`);
 
     return result.data.results
 
   }
-
-  // async getProgressFor(movieId: string) {
-  //   return this.get('progress', {
-  //     id: movieId,
-  //   });
-  // }
 }
-
-// const characters = [
-//   {
-//     name: 'Spider-Man',
-//     img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/526548a343e4b.jpg',
-//   },
-//   {
-//     name: 'Captain America',
-//     img: 'http://i.annihil.us/u/prod/marvel/i/mg/3/50/537ba56d31087.jpg',
-//   },
-// ];
 
 const typeDefs = gql`
   type Character {
@@ -79,7 +61,7 @@ const resolvers = {
   },
   Character: {
     name: (obj) => obj.name,
-    img: (obj) => obj.thumbnail.path + obj.thumbnail.extension
+    img: (obj) => obj.thumbnail.path.includes('image_not_available') ? null : obj.thumbnail.path + '.' + obj.thumbnail.extension
   }
 };
 
