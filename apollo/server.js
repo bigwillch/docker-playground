@@ -27,7 +27,7 @@ class MarvelAPI extends RESTDataSource {
     const args = { 
       limit: 20,
       orderBy: 'name',
-      nameStartsWith: 'Cap' 
+      nameStartsWith: name 
     }
     const params = qs.stringify({
       ...authParams,
@@ -37,9 +37,7 @@ class MarvelAPI extends RESTDataSource {
 
     const result = await this.get(`characters?${params}`);
 
-    console.log(result)
-
-    return result.response && result.response.docs ? result.response.docs : []  
+    return result.data.results
 
   }
 
@@ -68,22 +66,20 @@ const typeDefs = gql`
   }
 
   type Query {
-    characters: [Character]
+    characters(name: String): [Character]
   }
 
 `;
 
 const resolvers = {
   Query: {
-    // characters: () => characters,
     characters: async (_source, { name }, { dataSources }) => {
-      console.log('Query run')
       return dataSources.marvelAPI.getCharacters(name)
     },
   },
   Character: {
-    name: () => 'test',
-    img: () => 'testimg'
+    name: (obj) => obj.name,
+    img: (obj) => obj.thumbnail.path + obj.thumbnail.extension
   }
 };
 
