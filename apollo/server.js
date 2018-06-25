@@ -2,39 +2,37 @@ import 'babel-polyfill';
 const { ApolloServer, gql } = require('apollo-server')
 const { RESTDataSource } = require('apollo-datasource-rest')
 const qs = require('qs')
+const md5 = require('md5')
 // const { RedisCache } = require('apollo-server-redis');
 
-const md5 = require('md5')
 
-const auth = {
+const auth = () => ({
   marvel: {
     public: process.env.MARVEL_PUBLIC,
     private: process.env.MARVEL_PRIVATE
   }
-}
+})
 
 const ts = Date.now();
-const authParams = {
-  apikey: auth.marvel.public,
+const authParams =  () => ({
+  apikey: auth().marvel.public,
   ts: ts,
-  hash: md5(ts + auth.marvel.private + auth.marvel.public)
-}
+  hash: md5(ts + auth().marvel.private + auth().marvel.public)
+})
 
 class MarvelAPI extends RESTDataSource {
   baseURL = 'http://gateway.marvel.com/v1/public/';
 
   async getCharacters(name) {
-    const args = { 
+
+    const params = () => qs.stringify({
+      ...authParams(),
       limit: 20,
       orderBy: 'name',
-      nameStartsWith: name 
-    }
-    const params = qs.stringify({
-      ...authParams,
-      ...args
+      nameStartsWith: name ? name : undefined
     })
 
-    const result = await this.get(`characters?${params}`);
+    const result = await this.get(`characters?${params()}`);
 
     return result.data.results
 
@@ -42,20 +40,18 @@ class MarvelAPI extends RESTDataSource {
 }
 
 const typeDefs = gql`
+  type Query {
+    characters(name: String): [Character]
+  }
   type Character {
     name: String
     img: String
   }
-
-  type Query {
-    characters(name: String): [Character]
-  }
-
 `;
 
 const resolvers = {
   Query: {
-    characters: async (_source, { name }, { dataSources }) => {
+    characters: (_source, { name }, { dataSources }) => {
       return dataSources.marvelAPI.getCharacters(name)
     },
   },

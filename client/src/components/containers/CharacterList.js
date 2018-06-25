@@ -16,7 +16,7 @@ const GET_CHARACTERS = gql`
 class CharacterList extends Component {
 
   state = {
-    filter: '',
+    filter: null,
   }
 
   render() {
