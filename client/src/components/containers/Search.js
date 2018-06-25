@@ -1,53 +1,54 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { apiCall, apiClear } from 'redux/actions/api'
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    onChange: (params, endpoint) => {
-      dispatch(apiCall(params, endpoint))
-    },
-    clearSearch: () => dispatch(apiClear())
-  }
-}
+import CharacterList from 'Containers/CharacterList'
 
 class Search extends Component {
   state = {
-   query: '',
+   filter: null,
   }
 
   clearSearch = () => {
-    this.search.value = '';
-    this.props.clearSearch()
+    this.search.value = ''
+    this.setState({
+      filter: this.search.value
+    })
   }
 
   handleInputChange = () => {
     this.setState({
-     query: this.search.value
-    }, () => {
-      if (this.state.query) {
-        this.props.onChange({...this.props.params, [this.props.query]: this.state.query}, this.props.endpoint);
-      } else {
-        this.clearSearch();
-      }
+      filter: this.search.value
     })
   }
 
+  // handleInputChange = () => {
+  //   this.setState({
+  //     filter: this.search.value
+  //   }, () => {
+  //     if (this.state.filter) {
+  //       this.props.onChange({...this.props.params, [this.props.filter]: this.state.filter}, this.props.endpoint);
+  //     } else {
+  //       this.clearSearch();
+  //     }
+  //   })
+  // }
+
   render() {
    return (
-     <div>
-       <input
-         placeholder="Search for..."
-         ref={input => this.search = input}
-         onChange={this.handleInputChange}
-       />
-       <button onClick={ this.clearSearch }>Clear</button>
-     </div>
+    <React.Fragment>
+      <div>
+        <input
+          placeholder="Search for..."
+          ref={input => this.search = input}
+          onChange={this.handleInputChange}
+        />
+        <button onClick={ this.clearSearch }>Clear</button>
+      </div>
+      <CharacterList
+        name={this.state.filter}
+      />
+    </React.Fragment>
    )
   }
 }
 
-export default Search = connect(
-  null,
-  mapDispatchToProps
-)(Search)
+export default Search

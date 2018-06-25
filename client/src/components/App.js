@@ -1,10 +1,9 @@
 import React from "react";
-import { render } from "react-dom";
 
-import CharacterList from 'Containers/CharacterList'
+import Search from 'Containers/Search'
 
 const App = () => (
-  <CharacterList />
+  <Search />
 );
 
 export default App
